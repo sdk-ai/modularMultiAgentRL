@@ -7,8 +7,7 @@ from ray.rllib.agents.pg import PGTrainer, PGTFPolicy, PGTorchPolicy
 from ray.rllib.agents.registry import get_trainer_class
 import os
 # Import sim class
-from twobrains import Brains
-# from sim import IrrigationEnv as Brains
+from sim import IrrigationEnv as Brains
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--torch", action="store_true")
@@ -38,11 +37,29 @@ def setup_and_train():
     policy_graphs = {}
     for i in range(num_agents):
         policy_graphs['agent-' + str(i)] = gen_policy()
+    print("Policy Graphs")
+    print(policy_graphs)
     
-    def policy_mapping_fn(agent_id, episode, **kwargs):
+    def policy_mapping_fn(agent_id):
         return 'agent-' + str(agent_id)
 
     # Def training configs with hyperparam
+    # config={    
+    #             "log_level": "DEBUG",
+    #             "num_workers":2,
+    #             "num_cpus_for_driver": 1,
+    #             "num_cpus_per_worker": 1,
+    #             "num_gpus":int(os.environ.get("RLLIB_NUM_GPUS", "0")),
+    #             "simple_optimizer": True,
+    #             "num_sgd_iter": 10,
+    #             "train_batch_size": 128,
+    #             "lr": 5e-3,
+    #             "model":{"fcnet_hiddens": [8,8]},
+    #             "multiagent": {
+    #                 "policies": policy_graphs,
+    #                 "policy_mapping_fn": policy_mapping_fn
+    #             }
+    #     }
     config={
             "log_level": "WARN",
             "num_workers": 3,
@@ -54,8 +71,7 @@ def setup_and_train():
                 "policies": policy_graphs,
                 "policy_mapping_fn": policy_mapping_fn,
                 },
-            "env": "Brains",
-            "horizon": 1000
+            "env": "Brains"
             }
 
     pg_train = PGTrainer(env="Brains",config=config)
