@@ -8,11 +8,10 @@ class Brains(MultiAgentEnv):
     def __init__(self) -> None:
         self.sim = CartPole()
         self.num_agents = 3
-        self.observation_space = gym.spaces.Box(low=-100, high=100, shape=(2,))
+        self.observation_space = gym.spaces.Box(low=-100, high=100, shape=(4,))
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(1,))
 
     def reset(self):
-        
         initial_cart_position = np.random.uniform(-0.1,0.1)
         initial_cart_velocity = 0.0
         initial_pole_angle = np.random.uniform(-0.1,0.1)
@@ -32,7 +31,8 @@ class Brains(MultiAgentEnv):
         self.sim.reset(**config)
 
         for i in range(self.num_agents):
-            obs={i:np.array([initial_cart_position,initial_pole_angle])}
+            obs={i:np.array([initial_cart_position,initial_cart_velocity,\
+                initial_pole_angle,initial_angular_velocity])}
         print("OBS",obs)
         return obs
     
@@ -63,7 +63,14 @@ class Brains(MultiAgentEnv):
                 print("Pole Angle may be NaN")
                 print(self.sim.state['pole_angle'])
                 time.sleep(1000)
-            obs.update({i:np.array([self.sim.state['cart_position'],self.sim.state['pole_angle']])})
+            if np.isnan(self.sim.state['cart_velocity'])|np.isnan(self.sim.state['pole_angular_velocity']):
+                print("CART POS may be NaN")
+                print(self.sim.state['cart_velocity'])
+                print("Pole Angle may be NaN")
+                print(self.sim.state['pole_angular_velocty'])
+                time.sleep(1000)
+            obs.update({i:np.array([self.sim.state['cart_position'],self.sim.state['pole_angle'], \
+                self.sim.state['cart_velocity'],self.sim.state['pole_angular_velocity']])})
             rew[i], done[i], info[i] = reward, abs(self.sim.state['pole_angle'])>=1.0, {}
             terminal = terminal and done[i]
         done["__all__"] = terminal

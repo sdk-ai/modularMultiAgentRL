@@ -1,14 +1,16 @@
 import ray
 import argparse
+from ray.rllib.policy.torch_policy import TorchPolicy
 from ray.tune.logger import pretty_print
 from ray.tune.registry import register_env
-from ray.rllib.agents.ppo import PPOTrainer
+from ray.rllib.agents.ppo import PPOTrainer, PPOTFPolicy, PPOTorchPolicy
 from ray.rllib.agents.pg import PGTrainer, PGTFPolicy, PGTorchPolicy
-from ray.rllib.agents.registry import get_trainer_class
 import os
 # Import sim class
-from twobrains import Brains
-# from sim import IrrigationEnv as Brains
+from multiagent_cartpole import Brains
+
+# SetUP Algorithms for Policies:
+pTrainer, TFPolicy, TorchPolicy = PPOTrainer, PPOTFPolicy, PPOTorchPolicy
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--torch", action="store_true")
@@ -33,7 +35,7 @@ def setup_and_train():
     num_agents = single_env.num_agents
 
     def gen_policy():
-        return (PGTorchPolicy if args.torch else PGTFPolicy, obs_space, act_space, {})
+        return (TorchPolicy if args.torch else TFPolicy, obs_space, act_space, {})
     
     policy_graphs = {}
     for i in range(num_agents):
@@ -43,25 +45,27 @@ def setup_and_train():
         return 'agent-' + str(agent_id)
 
     # Def training configs with hyperparam
-    config={
-            "log_level": "WARN",
-            "num_workers": 3,
-            "num_cpus_for_driver": 1,
-            "num_cpus_per_worker": 1,
-            "lr": 5e-3,
-            "model":{"fcnet_hiddens": [8, 8]},
-            "multiagent": {
-                "policies": policy_graphs,
-                "policy_mapping_fn": policy_mapping_fn,
-                },
-            "env": "Brains",
-            "horizon": 1000
-            }
+    config={    
+                "log_level": "INFO",
+                "num_workers":3,
+                "num_cpus_for_driver": 1,
+                "num_cpus_per_worker": 2,
+                "num_gpus":int(os.environ.get("RLLIB_NUM_GPUS", "0")),
+                "simple_optimizer": True,
+                "num_sgd_iter": 10,
+                "train_batch_size": 128,
+                "lr": 5e-3,
+                "model":{"fcnet_hiddens": [8,8]},
+                "multiagent": {
+                    "policies": policy_graphs,
+                    "policy_mapping_fn": policy_mapping_fn
+                }
+        }
 
-    pg_train = PGTrainer(env="Brains",config=config)
+    p_train = pTrainer(env="Brains",config=config)
     for i in range(args.stop_iters):
         print("--- Iteration", i, "---")
-        result_pg = pg_train.train()
+        result_pg = p_train.train()
         print(pretty_print(result_pg))
 
 if __name__=='__main__':
