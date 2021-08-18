@@ -4,7 +4,7 @@ import numpy as np
 from sims.cartpole import CartPole
 from ray.rllib.env.multi_agent_env import MultiAgentEnv
 
-class Brains(MultiAgentEnv):
+class Simulator(MultiAgentEnv):
     def __init__(self) -> None:
         self.sim = CartPole()
         self.num_agents = 3
@@ -36,7 +36,7 @@ class Brains(MultiAgentEnv):
         print("OBS",obs)
         return obs
     
-    def cal_rewards(self, action_dict):
+    def reward_function(self, action_dict):
         reward = -abs(self.sim.state['pole_angle']) 
 
         return reward
@@ -44,31 +44,21 @@ class Brains(MultiAgentEnv):
     def step(self, action_dict):
         rew, done, info ={},{},{}
         obs = {}
+        # Catch any AI/RLlib agent bugs with NaNs
         if np.isnan(sum(action_dict.values())[0]):
-            print("ACTION DICT is NAN")
-            print(action_dict)
-            time.sleep(1000)
+            raise Exception("Actions from agent has NaN! Investigate or Change policy configs")
 
         self.sim.step(sum(action_dict.values())[0])
 
-        reward = self.cal_rewards(action_dict)
+        reward = self.reward_function(action_dict)
         terminal = True
 
 
         for i in range(self.num_agents):
-            
-            if np.isnan(self.sim.state['cart_position'])|np.isnan(self.sim.state['pole_angle']):
-                print("CART POS may be NaN")
-                print(self.sim.state['cart_position'])
-                print("Pole Angle may be NaN")
-                print(self.sim.state['pole_angle'])
-                time.sleep(1000)
-            if np.isnan(self.sim.state['cart_velocity'])|np.isnan(self.sim.state['pole_angular_velocity']):
-                print("CART POS may be NaN")
-                print(self.sim.state['cart_velocity'])
-                print("Pole Angle may be NaN")
-                print(self.sim.state['pole_angular_velocty'])
-                time.sleep(1000)
+            # Catch any Sim Bugs with NaNs
+            if np.isnan(sum(self.sim.state.values())):
+                raise Exception("Invalid States:NaN encountered. Debug Simulator!")
+
             obs.update({i:np.array([self.sim.state['cart_position'],self.sim.state['pole_angle'], \
                 self.sim.state['cart_velocity'],self.sim.state['pole_angular_velocity']])})
             rew[i], done[i], info[i] = reward, abs(self.sim.state['pole_angle'])>=1.0, {}

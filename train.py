@@ -7,7 +7,7 @@ from ray.rllib.agents.ppo import PPOTrainer, PPOTFPolicy, PPOTorchPolicy
 from ray.rllib.agents.pg import PGTrainer, PGTFPolicy, PGTorchPolicy
 import os
 # Import sim class
-from multiagent_cartpole import Brains
+from multiagent_cartpole import Simulator
 
 # SetUP Algorithms for Policies:
 pTrainer, TFPolicy, TorchPolicy = PPOTrainer, PPOTFPolicy, PPOTorchPolicy
@@ -25,9 +25,9 @@ def setup_and_train():
     ray.init()
 
     def env_creator(_):
-        return Brains()
-    single_env = Brains()
-    register_env("Brains", env_creator)
+        return Simulator()
+    single_env = Simulator()
+    register_env("Simulator", env_creator)
 
     # Env obs, actions and agents
     obs_space = single_env.observation_space
@@ -65,7 +65,7 @@ def setup_and_train():
                 }
         }
 
-    p_train = pTrainer(env="Brains",config=config)
+    p_train = pTrainer(env="Simulator",config=config)
     for i in range(args.stop_iters):
         print("--- Iteration", i, "---")
         result_pg = p_train.train()
