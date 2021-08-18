@@ -49,8 +49,10 @@ def setup_and_train():
     config={    
                 "log_level": "INFO",
                 "num_workers":3,
+                "num_envs_per_worker": 5,
                 "num_cpus_for_driver": 1,
                 "num_cpus_per_worker": 2,
+                "remote_worker_envs": True,
                 "num_gpus":int(os.environ.get("RLLIB_NUM_GPUS", "0")),
                 "simple_optimizer": True,
                 "num_sgd_iter": 10,
