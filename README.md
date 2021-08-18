@@ -7,15 +7,36 @@ Follow the steps given here: https://conda.io/projects/conda/en/latest/user-guid
 
 
 Use the `environment.yml` files to create a new virtual environment. Run the below command to install libraries specified in the yml file.
-```
+```bash
 conda env create -f environment.yml
+conda activate rllb
 ```
-The repository has two parts: 1) Training Agent , 2) Simulator Bridge. The Training Agent is the driver code that imports a simulator and trains an agent based on config specified and uses RLlib policies, algorithms and Ray tune for registering the simulator and also other facilities such as logging. 
-The simulator class is imported from a Simulator Bridge code that allows controlling the simulator by using `reset()` and `step()` functionality.
 
-Run `train.py` file which is for training agents using a custom simulator. Training config is set up to
-use `PPO` algorithm and using only CPUs, but this can be modified by making changes in the modifiable part of the code indicated by comments.
+### Repository Structure
+The repository has two parts: 1) Training Agent , 2) Simulator Bridge. The Training Agent is the driver code that imports a simulator,trains an agent based on config specified, and uses RLlib policies, algorithms and/or Ray tune for registering the simulator and also other facilities such as logging. This is done using `train.py`. The simulator class is imported from a Simulator Bridge code that allows controlling the simulator by using `reset()` and `step()` functionality. A simulator bridge template is provided, please see `simulator_bridge_template.py` for details. A complete example that runs with `train.py` is also included: `multiagent_cartpole.py`, and it allows training single or multiple agents.
 
+#### File Structure
+```bash
+├───.gitignore
+├───README.md
+├───environment.yml
+├───multiagent_cartpole.py
+├───sim_bridge_template.py
+├───train.py
+├───sims
+│   ├───cartpole.py
+│   ├───render.py
+```
+ 
+Steps to start training:
+    1. Add the simulator to sims directory or optionally integrate directly into a class in `simulator_bridge_template.py`.
+    2. Modify the outlined sim specifics in the `simulator_bridge_template.py`. Change simulator configs that usually include iniital states.
+    3. Run `train.py` file which is for training agents using a custom simulator as below:
+        ```bash
+            python train.py
+        ```
+    Training config can be added either in the command line or edited in the `train.py`. Default set up uses `PPO` algorithm and only CPUs, but this can be modified by making changes in the modifiable part of the code indicated by comments.
+    (Note: The configs design will be modified in near future.)
 
 #TODO: Simulator and Training Configs are in the examples e.g. config in `train.py` and in config in `multiagent_cartpole.py`.
 
@@ -32,3 +53,5 @@ Notes: The multiagent example here is different than one in RLLib. There are a f
     1) the RLlib  repo uses gym env directly to make a multiagent cartpole from the gym cartpole, so we use a separate cartpole model that allows stepping and resetting of the simulator, and modifying states, actions, their observation space, action space and their respective ranges. 
     2) the RLLib example does not train the same type of policies, as we are keeping models independent while the RLlib sample shares weights. This separation might help in agents training independent models and simplifying experimentation. In later stages, experimenters can explore model weight sharing. 
     3) RLlib is using separate environments and observations and actions, while in this example we are sharing global observations and the environment. Moreover, action of two agents is summed.
+
+Note: `render.py` is currently not used. This can be added later based on when Linux VM or Desktop requirements are completed.
