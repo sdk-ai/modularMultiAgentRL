@@ -45,6 +45,7 @@ def setup_and_train():
         return 'agent-' + str(agent_id)
 
     # Def training configs with hyperparam
+    # TODO: Add a common training config system to help ease experimentation 
     config={    
                 "log_level": "INFO",
                 "num_workers":3,
