@@ -94,8 +94,7 @@ class CartPole:
         # Add a small amount of random noise to the force so
         # the policy can't succeed by simply applying zero
         # force each time.
-        print("Sim Episode Step 10 s Time Sleep")
-        time.sleep(10) # 10 s sleep to mimic a slow sim
+        time.sleep(1) # 1 s sleep to mimic a slow sim
         force = FORCE_MAG * (action + random.uniform(-0.02, 0.02))
 
         # Precompute some helpful quantities

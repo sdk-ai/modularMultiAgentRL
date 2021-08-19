@@ -55,3 +55,12 @@ Notes: The multiagent example here is different than one in RLLib. There are a f
     3) RLlib is using separate environments and observations and actions, while in this example we are sharing global observations and the environment. Moreover, action of two agents is summed.
 
 Note: `render.py` is currently not used. This can be added later based on when Linux VM or Desktop requirements are completed.
+
+### LOGGING AND VISUALIZATIONS
+
+For now, we will use tensorboard for visualizing training progress. All logs of experiment configs and training progress are saved  at `~/ray_results`. To visualize progress, open a terminal at `$HOME` and
+run below:
+
+```bash
+tensorboard --logdir=~/ray_results
+```
