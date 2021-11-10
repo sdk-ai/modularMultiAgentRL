@@ -64,3 +64,18 @@ run below:
 ```bash
 tensorboard --logdir=~/ray_results
 ```
+
+
+### Training and Experimentation Settings:
+
+#### Termination criteria
+You can change the termination criteria by changing the stop criteria either by modifying in lines 22-24, or by passing using command line. For example, to increase number of iterations, raise `stop-iters`, you can modify
+```python
+parser.add_argument("--stop-iters", type=int, default=10000)
+parser.add_argument("--stop-reward", type=float, default=100.0)
+parser.add_argument("--stop-timesteps", type=int, default=10000)
+```
+
+### INFERENCING FROM A TRAINED MODEL:
+
+The trained model can be evaluated using `--assess` while running the `train.py` script. This will use the last checkpoint, and run an inference. The roll out script from RLlib requires supplying `env` separately, and would be less convenient.

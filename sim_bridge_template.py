@@ -22,7 +22,7 @@ class Simulator(MultiAgentEnv):
         }'''
 
         self.sim.reset(**config)
-        ''' ADD Sim Configs for each agent:
+        ''' ADD Sim observations for each agent:
         for i in range(self.num_agents):
             obs={i:np.array([<initial-sim>])}
         return obs '''

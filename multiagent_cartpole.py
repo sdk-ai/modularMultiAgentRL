@@ -11,13 +11,16 @@ class Simulator(MultiAgentEnv):
         self.num_agents = 3
         self.observation_space = gym.spaces.Box(low=-100, high=100, shape=(4,))
         self.action_space = gym.spaces.Box(low=-1, high=1, shape=(1,))
+        self.episode_len = 20
 
     def reset(self):
         initial_cart_position = np.random.uniform(-0.1,0.1)
         initial_cart_velocity = 0.0
         initial_pole_angle = np.random.uniform(-0.1,0.1)
         initial_angular_velocity = 0
+        self.iteration = 0
         self.dones = set()
+        obs = {}
         # Add Sim Configs: Episode Configs and INitial Sim States go here:
         ''' ADD SIM CONFIGS HERE:
         config = {
@@ -35,14 +38,14 @@ class Simulator(MultiAgentEnv):
         }
 
         self.sim.reset(**config)
-        ''' ADD Sim Configs for each agent:
+        ''' ADD Sim observations for each agent:
         for i in range(self.num_agents):
             obs={i:np.array([<initial-sim>])}
         return obs '''
 
         for i in range(self.num_agents):
-            obs={i:np.array([initial_cart_position,initial_cart_velocity,\
-                initial_pole_angle,initial_angular_velocity])}
+            obs.update({i:np.array([initial_cart_position,initial_cart_velocity,\
+                initial_pole_angle,initial_angular_velocity])})
         print("OBS",obs)
         return obs
     ''' Customize Reward Function
@@ -82,6 +85,8 @@ class Simulator(MultiAgentEnv):
             obs.update({i:np.array([self.sim.state['cart_position'],self.sim.state['pole_angle'], \
                 self.sim.state['cart_velocity'],self.sim.state['pole_angular_velocity']])})
             rew[i], done[i], info[i] = reward, abs(self.sim.state['pole_angle'])>=1.0, {}
+            if self.iteration == self.episode_len:
+                done[i] = True
             terminal = terminal and done[i]
         done["__all__"] = terminal
         # print("Rewards",rew)

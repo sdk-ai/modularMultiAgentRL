@@ -1,4 +1,4 @@
-name: rllb
+name: rlenv
 channels: 
   - conda-forge
   - defaults
